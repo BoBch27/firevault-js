@@ -277,6 +277,9 @@ This method can be used to get one or more documents from Firestore. You can use
 - where: Specifying conditions.
 - orderBy: Ordering data by a field.
 - limit: Limiting total documents returned from Firestore.
+- limitToLast: Limiting total documents returned from Firestore, starting from the end (must specify at least one "orderBy" clause).
+- startAfter: Find documents that start after the provided document (exclusive).
+- endBefore: Find documents that end before the provided document (exclusive).
 - offset: Offset on the data returned from Firestore.
 - get (async): This method is required at the end of each query with find in order to execute the query. It returns a Promise with the found documents.
   - options (optional) - An object containing 1 property.

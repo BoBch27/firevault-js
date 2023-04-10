@@ -3,6 +3,7 @@ import { format } from "./utils";
 import {
   Query as FirestoreQuery,
   QuerySnapshot,
+  DocumentSnapshot,
   DocumentData,
 } from 'firebase-admin/firestore';
 
@@ -36,6 +37,9 @@ class Query {
   private conditions: Condition[] = [];
   private orderField?: OrderBy;
   private limitTo?: number;
+  private limitFrom?: number;
+  private startItem?: DocumentSnapshot;
+  private endItem?: DocumentSnapshot;
   private offsetTo?: number;
 
   constructor(collection: string) {
@@ -88,6 +92,52 @@ class Query {
   }
 
   /**
+   * Creates a new Query that only returns the last matching documents.
+   * 
+   * Must specify at least one orderBy clause for limitToLast queries, otherwise an exception will be thrown during execution.
+   *
+   * @param {number} limit  Max number of items to return
+   * @return {*}  A new Query
+   * @memberof Query
+   */
+  limitToLast(limit: number): Query {
+    this.limitFrom = limit;
+    return this;
+  }
+
+  /**
+   * Creates a new Query that starts after the provided document (exclusive). 
+   * 
+   * The starting position is relative to the order of the query. 
+   * 
+   * The document must contain all of the fields provided in the orderBy of this query.
+   *
+   * @param {DocumentSnapshot} startAfter  The snapshot of the document to start after
+   * @return {*}  A new Query
+   * @memberof Query
+   */
+  startAfter(startAfter: DocumentSnapshot): Query {
+    this.startItem = startAfter;
+    return this;
+  }
+
+  /**
+   * Creates a new Query that ends before the provided document (exclusive). 
+   * 
+   * The end position is relative to the order of the query. 
+   * 
+   * The document must contain all of the fields provided in the orderBy of this query.
+   *
+   * @param {DocumentSnapshot} endBefore  The snapshot of the document to end before
+   * @return {*}  A new Query
+   * @memberof Query
+   */
+  endBefore(endBefore: DocumentSnapshot): Query {
+    this.endItem = endBefore;
+    return this;
+  }
+
+  /**
    * Specifies the offset of the returned results.
    * 
    * Returns a new (immutable) instance of the Query (rather than modify the existing instance) to impose the offset.
@@ -127,6 +177,18 @@ class Query {
       firestoreQuery = firestoreQuery.limit(this.limitTo);
     }
 
+    if (this.limitFrom !== undefined) {
+      firestoreQuery = firestoreQuery.limitToLast(this.limitFrom);
+    }
+
+    if (this.startItem) {
+      firestoreQuery = firestoreQuery.startAfter(this.startItem);
+    }
+
+    if (this.endItem) {
+      firestoreQuery = firestoreQuery.endBefore(this.endItem);
+    }
+
     if (this.offsetTo !== undefined) {
       firestoreQuery = firestoreQuery.offset(this.offsetTo);
     }
@@ -159,6 +221,14 @@ class Query {
     if (this.orderField !== undefined) {
       firestoreQuery = firestoreQuery
         .orderBy(this.orderField.field, this.orderField?.direction);
+    }
+
+    if (this.startItem) {
+      firestoreQuery = firestoreQuery.startAfter(this.startItem);
+    }
+
+    if (this.endItem) {
+      firestoreQuery = firestoreQuery.endBefore(this.endItem);
     }
 
     if (this.offsetTo !== undefined) {
