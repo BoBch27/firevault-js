@@ -43,12 +43,16 @@ class Schema<T extends DocumentData> {
     }
   }
 
-  private stripData(data: T, schema: SchemaDefiniton): void {
+  private stripData(data: T, schema: SchemaDefiniton): T {
+    const newData: { [key: string]: any } = {};
+
     for (const key in data) {
       if (schema[key] !== undefined) {
-        delete data[key];
+        newData[key] = data[key];
       }
     }
+
+    return newData as T;
   }
 
   private nestData(data: T): T {
@@ -72,19 +76,28 @@ class Schema<T extends DocumentData> {
     return nestedObj as T;
   }
 
-  private flattenData(data: T, prefix: string = ''): T {
+  private flattenData(data: T): T {
     const result: { [key: string]: any }  = {};
+    const stack = [[data, ""]];
 
-    Object.entries(data).forEach(([key, value]) => {
+    while (stack.length > 0) {
+      const item = stack.pop();
 
-      if (typeof value == "object" && value !== undefined && value !== null && 
-        !(value instanceof  Date) && 
-        !Array.isArray(value) && !(value instanceof RegExp)) {
-        Object.assign(result, this.flattenData(value, `${prefix}${key}.`));
-      } else {
-        result[`${prefix}${key}`] = value;
+      if (item) {
+        const [obj, prefix] = item;
+
+        Object.entries(obj).forEach(([key, value]) => {
+          const newKey = prefix ? `${prefix}.${key}` : key;
+  
+          if (typeof value === "object" && value !== null && !(value instanceof Date) && 
+            !Array.isArray(value) && !(value instanceof RegExp)) {
+            stack.push([value as T, newKey]);
+          } else {
+            result[newKey] = value;
+          }
+        });
       }
-    });
+    }
 
     return result as T;
   }
@@ -247,7 +260,7 @@ class Schema<T extends DocumentData> {
 
     // remove data properties which are not defined in schema (unless disabled using options)
     if (!options || !options.skipStrip) {
-      this.stripData(dataToCheck, schema);
+      dataToCheck = this.stripData(dataToCheck, schema);
     }
 
     for (const key in schema) {

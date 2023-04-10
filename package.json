@@ -1,6 +1,6 @@
 {
   "name": "firevault-js",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A Mongoose-inspired Firestore object modeling library to make life easier.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
