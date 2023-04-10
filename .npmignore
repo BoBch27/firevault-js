@@ -1,0 +1,5 @@
+*.map
+*.spec.*
+*.git
+SetupPackage.*
+version.txt

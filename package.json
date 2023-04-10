@@ -1,0 +1,42 @@
+{
+  "name": "firevault-js",
+  "version": "1.0.0",
+  "description": "A Mongoose-inspired Firestore object modeling library to make life easier.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "compile": "tsc",
+    "build": "npm run clean && npm run compile && node dist/SetupPackage.js",
+    "pack": "cd dist && npm pack",
+    "publish": "cd dist && npm publish"
+  },
+  "author": "Bobby Donev <hello@bobbydonev.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bobch27/firevault.git"
+  },
+  "keywords": [
+    "firebase",
+    "firestore",
+    "document",
+    "model",
+    "firevault",
+    "schema",
+    "database",
+    "odm",
+    "db"
+  ],
+  "bugs": {
+    "url": "https://github.com/bobch27/firevault/issues"
+  },
+  "homepage": "https://github.com/bobch27/firevault#readme",
+  "peerDependencies": {
+    "firebase-admin": "^11.2.0"
+  },
+  "devDependencies": {
+    "firebase-admin": "^11.5.0",
+    "typescript": "^4.7.4"
+  }
+}
