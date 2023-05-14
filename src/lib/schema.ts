@@ -278,6 +278,11 @@ class Schema<T extends DocumentData> {
 
       let value = dataToCheck[key];
 
+      // perform function recursively, if nested schema is used
+      if (nestedSchema !== undefined) {
+        value = (dataToCheck[key as keyof T] as T) = await this.validate(value, nestedSchema, options);
+      }
+
       // set default value if not skipped using options (only if value is undefined)
       if (!options || !options.skipDefault) {
         if (value === undefined && defaultFn !== undefined) {
@@ -293,6 +298,11 @@ class Schema<T extends DocumentData> {
       // validate value's type
       this.validateType(value, type, key);
 
+      // perform transform fn (only if value isn't undefined)
+      if (value !== undefined && transformFn !== undefined) {
+        value = dataToCheck[key as keyof T] = this.doTransform(value, transformFn, key);
+      }
+
       // validate value's length
       this.validateMaxLength(value, maxLength, key);
       this.validateMinLength(value, minLength, key);
@@ -302,16 +312,6 @@ class Schema<T extends DocumentData> {
 
       // validate array elements type
       this.validateArrayTypes(value, arrayOf, key);
-
-      // perform transform fn (only if value isn't undefined)
-      if (value !== undefined && transformFn !== undefined) {
-        value = dataToCheck[key as keyof T] = this.doTransform(value, transformFn, key);
-      }
-
-      // perform function recursively, if nested schema is used
-      if (nestedSchema !== undefined) {
-        value = (dataToCheck[key as keyof T] as T) = await this.validate(value, nestedSchema, options);
-      }
     }
 
     // if flat dot notation data was used and was deepened earlier, flatten data object here, 
